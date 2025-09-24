@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shop - GraphQL AJAX</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; }
+        h1 { margin: 0 0 16px; }
+        .row { display: flex; gap: 24px; flex-wrap: wrap; }
+        .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; width: 360px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+        label { display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+        input, select, button, textarea { width: 100%; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+        button { cursor: pointer; background: #2563eb; color: #fff; border: none; }
+        button.secondary { background: #111827; }
+        button:disabled { opacity: .6; cursor: not-allowed; }
+        .list { margin-top: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid #e5e7eb; text-align: left; padding: 8px; font-size: 14px; }
+        .muted { color: #6b7280; }
+        .error { color: #b91c1c; font-size: 13px; margin-top: 8px; white-space: pre-wrap; }
+        .success { color: #065f46; font-size: 13px; margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Shop - GraphQL AJAX</h1>
+
+    <div class="row">
+        <div class="card">
+            <h3>Products - Giá tăng dần</h3>
+            <button id="btnLoadPriceAsc">Tải danh sách</button>
+            <div class="list">
+                <table id="tblPriceAsc">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th class="muted">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="errPriceAsc" class="error"></div>
+        </div>
+
+        <div class="card">
+            <h3>Products - Theo Category</h3>
+            <label for="selCategory">Chọn Category</label>
+            <select id="selCategory"></select>
+            <button id="btnLoadByCat" style="margin-top:8px">Tải danh sách</button>
+            <div class="list">
+                <table id="tblByCat">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th class="muted">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="errByCat" class="error"></div>
+        </div>
+
+        <div class="card">
+            <h3>Tạo Product</h3>
+            <label>Title</label>
+            <input id="inpTitle" placeholder="Tên sản phẩm" />
+            <label style="margin-top:8px">Quantity</label>
+            <input id="inpQty" type="number" value="0" />
+            <label style="margin-top:8px">Desc</label>
+            <textarea id="inpDesc" rows="3" placeholder="Mô tả"></textarea>
+            <label style="margin-top:8px">Price</label>
+            <input id="inpPrice" type="number" step="0.01" />
+            <label style="margin-top:8px">User</label>
+            <select id="selUser"></select>
+            <button id="btnCreate" style="margin-top:10px">Tạo</button>
+            <div id="msgCreate" class="success"></div>
+            <div id="errCreate" class="error"></div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top:24px">
+        <div class="card">
+            <h3>Users (CRUD)</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                <input id="userFullname" placeholder="Fullname" />
+                <input id="userEmail" placeholder="Email" />
+                <input id="userPassword" placeholder="Password" />
+                <input id="userPhone" placeholder="Phone" />
+            </div>
+            <button id="btnCreateUser">Tạo User</button>
+            <div class="list">
+                <table id="tblUsers">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fullname</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="errUsers" class="error"></div>
+        </div>
+
+        <div class="card">
+            <h3>Categories (CRUD)</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                <input id="catName" placeholder="Name" />
+                <input id="catImage" placeholder="Image" />
+            </div>
+            <button id="btnCreateCategory">Tạo Category</button>
+            <div class="list">
+                <table id="tblCategories">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Image</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="errCategories" class="error"></div>
+        </div>
+
+        <div class="card">
+            <h3>Products (CRUD nhanh)</h3>
+            <button id="btnLoadAllProducts">Tải tất cả</button>
+            <div class="list">
+                <table id="tblProducts">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Price</th>
+                            <th>UserId</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="errProducts" class="error"></div>
+        </div>
+    </div>
+
+    <script>
+        const graphql = async (query, variables) => {
+            const res = await fetch('/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, variables })
+            });
+            const json = await res.json();
+            if (json.errors) {
+                const msg = json.errors.map(e => e.message || JSON.stringify(e)).join('\n');
+                throw new Error(msg);
+            }
+            return json.data;
+        };
+
+        const $ = (id) => document.getElementById(id);
+
+        const loadCategories = async () => {
+            try {
+                const data = await graphql(`query { categories { id name } }`);
+                const sel = $('selCategory');
+                sel.innerHTML = '';
+                data.categories.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = `${c.id} - ${c.name}`;
+                    sel.appendChild(opt);
+                });
+
+            } catch (e) {
+                $('errByCat').textContent = e.message;
+            }
+        };
+
+        const loadUsers = async () => {
+            try {
+                const data = await graphql(`query { users { id fullname } }`);
+                const sel = $('selUser');
+                sel.innerHTML = '<option value="">-- Không gán user --</option>';
+                data.users.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.id;
+                    opt.textContent = `${u.id} - ${u.fullname}`;
+                    sel.appendChild(opt);
+                });
+            } catch (e) {
+                $('errCreate').textContent = e.message;
+            }
+        };
+
+        const renderRows = (tbody, products) => {
+            tbody.innerHTML = '';
+            products.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${p.id}</td><td>${p.title}</td><td class="muted">${p.price}</td>`;
+                tbody.appendChild(tr);
+            });
+        };
+
+        $('btnLoadPriceAsc').addEventListener('click', async () => {
+            $('errPriceAsc').textContent = '';
+            try {
+                const data = await graphql(`query { productsByPriceAsc { id title price } }`);
+                renderRows($('tblPriceAsc').querySelector('tbody'), data.productsByPriceAsc);
+            } catch (e) {
+                $('errPriceAsc').textContent = e.message;
+            }
+        });
+
+        // USERS CRUD
+        const loadUsersList = async () => {
+            try {
+                const data = await graphql(`query { users { id fullname email phone } }`);
+                const tb = $('tblUsers').querySelector('tbody');
+                tb.innerHTML = '';
+                data.users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${u.id}</td>
+                        <td>${u.fullname}</td>
+                        <td>${u.email}</td>
+                        <td>${u.phone ?? ''}</td>
+                        <td>
+                            <button class="secondary" data-action="edit-user" data-id="${u.id}">Edit</button>
+                            <button data-action="del-user" data-id="${u.id}">Delete</button>
+                        </td>`;
+                    tb.appendChild(tr);
+                });
+            } catch (e) { $('errUsers').textContent = e.message; }
+        };
+
+        $('btnCreateUser').addEventListener('click', async () => {
+            $('errUsers').textContent = '';
+            try {
+                const fullname = $('userFullname').value.trim();
+                const email = $('userEmail').value.trim();
+                const password = $('userPassword').value.trim();
+                const phone = $('userPhone').value.trim();
+                if (!fullname || !email || !password) throw new Error('fullname/email/password là bắt buộc');
+                await graphql(`mutation($fullname:String!,$email:String!,$password:String!,$phone:String){ createUser(fullname:$fullname,email:$email,password:$password,phone:$phone){ id } }`, { fullname, email, password, phone });
+                $('userFullname').value = '';
+                $('userEmail').value = '';
+                $('userPassword').value = '';
+                $('userPhone').value = '';
+                await Promise.all([loadUsersList(), loadUsers()]);
+            } catch (e) { $('errUsers').textContent = e.message; }
+        });
+
+        $('tblUsers').addEventListener('click', async (ev) => {
+            const btn = ev.target.closest('button');
+            if (!btn) return;
+            const id = parseInt(btn.getAttribute('data-id'), 10);
+            if (btn.getAttribute('data-action') === 'del-user') {
+                if (!confirm('Xóa user #' + id + '?')) return;
+                try {
+                    await graphql(`mutation($id:ID!){ deleteUser(id:$id) }`, { id });
+                    await Promise.all([loadUsersList(), loadUsers()]);
+                } catch (e) { $('errUsers').textContent = e.message; }
+            }
+            if (btn.getAttribute('data-action') === 'edit-user') {
+                const fullname = prompt('Fullname mới (bỏ qua để giữ nguyên):');
+                const email = prompt('Email mới (bỏ qua để giữ nguyên):');
+                const password = prompt('Password mới (bỏ qua để giữ nguyên):');
+                const phone = prompt('Phone mới (bỏ qua để giữ nguyên):');
+                try {
+                    await graphql(`mutation($id:ID!,$fullname:String,$email:String,$password:String,$phone:String){ updateUser(id:$id,fullname:$fullname,email:$email,password:$password,phone:$phone){ id } }`, { id, fullname, email, password, phone });
+                    await Promise.all([loadUsersList(), loadUsers()]);
+                } catch (e) { $('errUsers').textContent = e.message; }
+            }
+        });
+
+        // CATEGORIES CRUD
+        const loadCategoriesList = async () => {
+            try {
+                const data = await graphql(`query { categories { id name images } }`);
+                const tb = $('tblCategories').querySelector('tbody');
+                tb.innerHTML = '';
+                data.categories.forEach(c => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${c.id}</td>
+                        <td>${c.name}</td>
+                        <td>${c.images ?? ''}</td>
+                        <td>
+                            <button class="secondary" data-action="edit-cat" data-id="${c.id}">Edit</button>
+                            <button data-action="del-cat" data-id="${c.id}">Delete</button>
+                        </td>`;
+                    tb.appendChild(tr);
+                });
+            } catch (e) { $('errCategories').textContent = e.message; }
+        };
+
+        $('btnCreateCategory').addEventListener('click', async () => {
+            $('errCategories').textContent = '';
+            try {
+                const name = $('catName').value.trim();
+                const images = $('catImage').value.trim();
+                if (!name) throw new Error('name là bắt buộc');
+                await graphql(`mutation($name:String!,$images:String){ createCategory(name:$name, images:$images){ id } }`, { name, images: images || null });
+                $('catName').value = '';
+                $('catImage').value = '';
+                await Promise.all([loadCategoriesList(), loadCategories()]);
+            } catch (e) { $('errCategories').textContent = e.message; }
+        });
+
+        $('tblCategories').addEventListener('click', async (ev) => {
+            const btn = ev.target.closest('button');
+            if (!btn) return;
+            const id = parseInt(btn.getAttribute('data-id'), 10);
+            if (btn.getAttribute('data-action') === 'del-cat') {
+                if (!confirm('Xóa category #' + id + '?')) return;
+                try {
+                    await graphql(`mutation($id:ID!){ deleteCategory(id:$id) }`, { id });
+                    await Promise.all([loadCategoriesList(), loadCategories()]);
+                } catch (e) { $('errCategories').textContent = e.message; }
+            }
+            if (btn.getAttribute('data-action') === 'edit-cat') {
+                const name = prompt('Name mới (bỏ qua để giữ nguyên):');
+                const images = prompt('Image mới (bỏ qua để giữ nguyên):');
+                try {
+                    await graphql(`mutation($id:ID!,$name:String,$images:String){ updateCategory(id:$id, name:$name, images:$images){ id } }`, { id, name, images });
+                    await Promise.all([loadCategoriesList(), loadCategories()]);
+                } catch (e) { $('errCategories').textContent = e.message; }
+            }
+        });
+
+        // PRODUCTS CRUD (list + delete + quick edit)
+        const loadAllProducts = async () => {
+            try {
+                const data = await graphql(`query { products { id title price user { id } } }`);
+                const tb = $('tblProducts').querySelector('tbody');
+                tb.innerHTML = '';
+                data.products.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${p.id}</td>
+                        <td>${p.title}</td>
+                        <td>${p.price}</td>
+                        <td>${p.user ? p.user.id : ''}</td>
+                        <td>
+                            <button class="secondary" data-action="edit-product" data-id="${p.id}">Edit</button>
+                            <button data-action="del-product" data-id="${p.id}">Delete</button>
+                        </td>`;
+                    tb.appendChild(tr);
+                });
+            } catch (e) { $('errProducts').textContent = e.message; }
+        };
+
+        $('btnLoadAllProducts').addEventListener('click', loadAllProducts);
+
+        $('tblProducts').addEventListener('click', async (ev) => {
+            const btn = ev.target.closest('button');
+            if (!btn) return;
+            const id = parseInt(btn.getAttribute('data-id'), 10);
+            if (btn.getAttribute('data-action') === 'del-product') {
+                if (!confirm('Xóa product #' + id + '?')) return;
+                try {
+                    await graphql(`mutation($id:ID!){ deleteProduct(id:$id) }`, { id });
+                    await Promise.all([
+                        loadAllProducts(),
+                        graphql(`query { productsByPriceAsc { id title price } }`).then(d => renderRows($('tblPriceAsc').querySelector('tbody'), d.productsByPriceAsc))
+                    ]);
+                } catch (e) { $('errProducts').textContent = e.message; }
+            }
+            if (btn.getAttribute('data-action') === 'edit-product') {
+                const title = prompt('Title mới (bỏ qua để giữ nguyên):');
+                const priceStr = prompt('Price mới (bỏ qua để giữ nguyên):');
+                const quantityStr = prompt('Quantity mới (bỏ qua để giữ nguyên):');
+                const userIdStr = prompt('UserId mới (bỏ qua để giữ nguyên):');
+                const desc = prompt('Desc mới (bỏ qua để giữ nguyên):');
+                const price = priceStr ? parseFloat(priceStr) : null;
+                const quantity = quantityStr ? parseInt(quantityStr, 10) : null;
+                const userId = userIdStr ? parseInt(userIdStr, 10) : null;
+                try {
+                    await graphql(`mutation($id:ID!,$title:String,$price:BigDecimal,$quantity:Int,$userId:ID,$desc:String){ updateProduct(id:$id,title:$title,price:$price,quantity:$quantity,userId:$userId,desc:$desc){ id } }`, { id, title, price, quantity, userId, desc });
+                    await Promise.all([
+                        loadAllProducts(),
+                        graphql(`query { productsByPriceAsc { id title price } }`).then(d => renderRows($('tblPriceAsc').querySelector('tbody'), d.productsByPriceAsc))
+                    ]);
+                } catch (e) { $('errProducts').textContent = e.message; }
+            }
+        });
+        $('btnLoadByCat').addEventListener('click', async () => {
+            $('errByCat').textContent = '';
+            try {
+                const categoryId = parseInt($('selCategory').value, 10);
+                const data = await graphql(`query($categoryId: ID!) { productsByCategory(categoryId: $categoryId) { id title price } }`, { categoryId });
+                renderRows($('tblByCat').querySelector('tbody'), data.productsByCategory);
+            } catch (e) {
+                $('errByCat').textContent = e.message;
+            }
+        });
+
+        $('btnCreate').addEventListener('click', async () => {
+            $('msgCreate').textContent = '';
+            $('errCreate').textContent = '';
+            try {
+                const title = $('inpTitle').value.trim();
+                const quantity = parseInt($('inpQty').value || '0', 10);
+                const desc = $('inpDesc').value;
+                const price = parseFloat($('inpPrice').value);
+                const userIdRaw = $('selUser').value;
+                const userId = userIdRaw ? parseInt(userIdRaw, 10) : null;
+
+                if (!title || isNaN(price)) {
+                    throw new Error('Title và Price là bắt buộc');
+                }
+
+                const data = await graphql(
+                    `mutation($title: String!, $quantity: Int, $desc: String, $price: BigDecimal!, $userId: ID) {
+                        createProduct(title: $title, quantity: $quantity, desc: $desc, price: $price, userId: $userId) {
+                            id title price
+                        }
+                    }`,
+                    { title, quantity, desc, price, userId }
+                );
+                $('msgCreate').textContent = `Tạo thành công: #${data.createProduct.id} - ${data.createProduct.title}`;
+                // refresh danh sách giá tăng dần
+                const ref = await graphql(`query { productsByPriceAsc { id title price } }`);
+                renderRows($('tblPriceAsc').querySelector('tbody'), ref.productsByPriceAsc);
+            } catch (e) {
+                $('errCreate').textContent = e.message;
+            }
+        });
+
+        // Init
+        (async () => {
+            await Promise.all([
+                loadCategories(),
+                loadUsers(),
+                loadUsersList(),
+                loadCategoriesList(),
+                loadAllProducts()
+            ]);
+        })();
+    </script>
+</body>
+</html>
+
+

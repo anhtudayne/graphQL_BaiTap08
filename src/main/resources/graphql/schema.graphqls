@@ -1,0 +1,90 @@
+scalar BigDecimal
+
+type User {
+  id: ID!
+  fullname: String!
+  email: String!
+  password: String!
+  phone: String
+  categories: [Category!]!
+}
+
+type Category {
+  id: ID!
+  name: String!
+  images: String
+}
+
+type Product {
+  id: ID!
+  title: String!
+  quantity: Int
+  desc: String
+  price: BigDecimal!
+  user: User
+}
+
+input CreateUserInput {
+  fullname: String!
+  email: String!
+  password: String!
+  phone: String
+}
+
+input UpdateUserInput {
+  id: ID!
+  fullname: String
+  email: String
+  password: String
+  phone: String
+}
+
+input CreateCategoryInput { name: String!, images: String }
+input UpdateCategoryInput { id: ID!, name: String, images: String }
+
+input CreateProductInput {
+  title: String!
+  quantity: Int
+  desc: String
+  price: BigDecimal!
+  userId: ID
+}
+
+input UpdateProductInput {
+  id: ID!
+  title: String
+  quantity: Int
+  desc: String
+  price: BigDecimal
+  userId: ID
+}
+
+type Query {
+  productsByPriceAsc: [Product!]!
+  productsByCategory(categoryId: ID!): [Product!]!
+  users: [User!]!
+  user(id: ID!): User
+  categories: [Category!]!
+  category(id: ID!): Category
+  products: [Product!]!
+  product(id: ID!): Product
+}
+
+type Mutation {
+  # User
+  createUser(fullname: String!, email: String!, password: String!, phone: String): User!
+  updateUser(id: ID!, fullname: String, email: String, password: String, phone: String): User!
+  deleteUser(id: ID!): Boolean!
+
+  # Category
+  createCategory(name: String!, images: String): Category!
+  updateCategory(id: ID!, name: String, images: String): Category!
+  deleteCategory(id: ID!): Boolean!
+
+  # Product
+  createProduct(title: String!, quantity: Int, desc: String, price: BigDecimal!, userId: ID): Product!
+  updateProduct(id: ID!, title: String, quantity: Int, desc: String, price: BigDecimal, userId: ID): Product!
+  deleteProduct(id: ID!): Boolean!
+}
+
+
